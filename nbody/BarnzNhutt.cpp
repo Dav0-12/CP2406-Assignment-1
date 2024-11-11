@@ -174,7 +174,33 @@ void interactBodies(struct body *bods) {
 }
 
 void singleInteraction(struct body *a, struct body *b) {
-    // complete this function
+    // Initiaslise 3D position difference variable
+    vec3 posdiff;
+    // Calculate position difference for 3 dimensions
+    posdiff.x = (a->position.x - b->position.x)*TO_METERS;
+    posdiff.y = (a->position.y - b->position.y)*TO_METERS;
+    posdiff.z = (a->position.z - b->position.z)*TO_METERS;
+
+    // Calculate magnitude of position difference
+    double dist = magnitude(posdiff);
+
+    // Check if the distance is 0
+    if (dist == 0.0){
+        return;
+    }
+    
+    // Calculate the force between the two bodies
+    double force = TIME_STEP * (G * a->mass * b->mass) / (((dist*dist) + (SOFTENING*SOFTENING)) * dist);
+
+    // Acceleration of the target body for 3 dimensions
+    a->accel.x -= (force * posdiff.x) / a->mass;
+    a->accel.y -= (force * posdiff.y) / a->mass;
+    a->accel.z -= (force * posdiff.z) / a->mass;
+
+    // Acceleration of the other body for 3 dimensions
+    b->accel.x += (force * posdiff.x) / b->mass;
+    b->accel.y += (force * posdiff.y) / b->mass;
+    b->accel.z += (force * posdiff.z) / b->mass;
 }
 
 
