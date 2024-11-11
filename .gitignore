@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+CMakeLists.txt
+.idea/.name
+.idea/CP2406-A3-StarterPack.iml
+.idea/editor.xml
+.idea/misc.xml
+.idea/modules.xml
