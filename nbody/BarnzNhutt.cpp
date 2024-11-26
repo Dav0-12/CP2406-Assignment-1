@@ -12,6 +12,18 @@
 // #include <omp.h>
 #include "Bhtree.cpp"
 
+// Libraries for timing
+#include <chrono>
+
+// Libraries for memory
+#if defined(_WIN32) || defined(_WIN64)
+#include <windows.h>
+#include <psapi.h>
+#elif defined(__APPLE__) && defined(__MACH__)
+#include <mach/mach.h>
+#include <unistd.h>
+#endif
+
 void initializeBodies(struct body *bods);
 
 void runSimulation(struct body *b, char *image, double *hdImage);
@@ -42,6 +54,24 @@ double clamp(double x);
 
 void writeRender(char *data, double *hdImage, int step);
 
+// Code for memory
+#if defined(_WIN32) || defined(_WIN64)
+SIZE_T getMemoryUsage() {
+    PROCESS_MEMORY_COUNTERS_EX pmc;
+    GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS *) &pmc, sizeof(pmc));
+    return pmc.WorkingSetSize;
+}
+#elif defined(__APPLE__) && defined(__MACH__)
+size_t getMemoryUsage() {
+    struct mach_task_basic_info info;
+    mach_msg_type_number_t infoCount = MACH_TASK_BASIC_INFO_COUNT;
+    if (task_info(mach_task_self(), MACH_TASK_BASIC_INFO, (task_info_t)&info, &infoCount) != KERN_SUCCESS) {
+        return 0;
+    }
+    return info.resident_size;
+}
+#endif
+
 int main() {
 #ifdef FE_NOMASK_ENV
 	if (DEBUG_INFO)
@@ -53,8 +83,26 @@ int main() {
     double *hdImage = new double[WIDTH * HEIGHT * 3];
     struct body *bodies = new struct body[NUM_BODIES];
 
+    // Get initial memory usage
+    auto initial_memory = getMemoryUsage();
+    // Start measuring time
+    auto start = std::chrono::high_resolution_clock::now();
+
     initializeBodies(bodies);
     runSimulation(bodies, image, hdImage);
+
+    // Stop measuring time
+    auto end = std::chrono::high_resolution_clock::now();
+    // Get memory usage after the function call
+    auto final_memory = getMemoryUsage();
+
+    // Print memory usage
+    std::cout << "Memory used by the function: " << (final_memory - initial_memory) / 1024 << " KB" << std::endl;
+
+    // Calculate and print the duration
+    std::chrono::duration<double, std::milli> duration = end - start;
+    std::cout << "Simulation Duration: " << duration.count() << " ms" << std::endl;
+
     std::cout << "\nwe made it\n";
     delete[] bodies;
     delete[] image;
@@ -183,14 +231,9 @@ void singleInteraction(struct body *a, struct body *b) {
 
     // Calculate magnitude of position difference
     double dist = magnitude(posdiff);
-
-    // Check if the distance is 0
-    if (dist == 0.0){
-        return;
-    }
     
     // Calculate the force between the two bodies
-    double force = TIME_STEP * (G * a->mass * b->mass) / (((dist*dist) + (SOFTENING*SOFTENING)) * dist);
+    double force = TIME_STEP * (G * a->mass * b->mass) / ((pow(dist, 2) + pow(SOFTENING, 2)) * dist);
 
     // Acceleration of the target body for 3 dimensions
     a->accel.x -= (force * posdiff.x) / a->mass;

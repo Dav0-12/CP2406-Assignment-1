@@ -36,3 +36,7 @@ CMakeLists.txt
 .idea/editor.xml
 .idea/misc.xml
 .idea/modules.xml
+
+# CLion project files
+.idea
+cmake-build-*
