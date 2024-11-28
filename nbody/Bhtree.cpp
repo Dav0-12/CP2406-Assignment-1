@@ -157,25 +157,20 @@ public:
         posdiff.z = (target->position.z - other->position.z) * TO_METERS;
 
         // Calculate the magnitude of the position difference vector
-        double dist = magnitude(&posdiff);
+        const double dist = magnitude(&posdiff);
 
         // If the distance is zero it means the two bodies are the same. Just return.
         if (dist == 0){
             return;
         }
 
-        // Calculaate the magnitude of the force acting between the bodies
-        double force = TIME_STEP * (G * target->mass * other->mass) / ((pow(dist, 2) + pow(SOFTENING, 2)) * dist);
+        // Calculate the magnitude of the force acting between the bodies
+        const double force = TIME_STEP * (G * target->mass * other->mass) / ((pow(dist, 2) + pow(SOFTENING, 2)) * dist);
 
         // Calculate the acceleration vector for the target body
         target->accel.x -= force * posdiff.x / target->mass;
         target->accel.y -= force * posdiff.y / target->mass;
         target->accel.z -= force * posdiff.z / target->mass;
-
-        // Calculate the acceleration vector for the other body
-        other->accel.x += force * posdiff.x / other->mass;
-        other->accel.y += force * posdiff.y / other->mass;
-        other->accel.z += force * posdiff.z / other->mass;
     }
 
     void interactInTree(body *bod) {

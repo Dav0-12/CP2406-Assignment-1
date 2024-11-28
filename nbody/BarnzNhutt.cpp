@@ -83,12 +83,13 @@ int main() {
     double *hdImage = new double[WIDTH * HEIGHT * 3];
     struct body *bodies = new struct body[NUM_BODIES];
 
+    initializeBodies(bodies);
+
     // Get initial memory usage
     auto initial_memory = getMemoryUsage();
     // Start measuring time
     auto start = std::chrono::high_resolution_clock::now();
 
-    initializeBodies(bodies);
     runSimulation(bodies, image, hdImage);
 
     // Stop measuring time
@@ -97,7 +98,7 @@ int main() {
     auto final_memory = getMemoryUsage();
 
     // Print memory usage
-    std::cout << "Memory used by the function: " << (final_memory - initial_memory) / 1024 << " KB" << std::endl;
+    std::cout << "\nMemory used by the function: " << (final_memory - initial_memory) / 1024 << " KB" << std::endl;
 
     // Calculate and print the duration
     std::chrono::duration<double, std::milli> duration = end - start;
@@ -222,7 +223,7 @@ void interactBodies(struct body *bods) {
 }
 
 void singleInteraction(struct body *a, struct body *b) {
-    // Initiaslise 3D position difference variable
+    // Initialise 3D position difference variable
     vec3 posdiff;
     // Calculate position difference for 3 dimensions
     posdiff.x = (a->position.x - b->position.x)*TO_METERS;
@@ -230,10 +231,10 @@ void singleInteraction(struct body *a, struct body *b) {
     posdiff.z = (a->position.z - b->position.z)*TO_METERS;
 
     // Calculate magnitude of position difference
-    double dist = magnitude(posdiff);
+    const double dist = magnitude(posdiff);
     
     // Calculate the force between the two bodies
-    double force = TIME_STEP * (G * a->mass * b->mass) / ((pow(dist, 2) + pow(SOFTENING, 2)) * dist);
+    const double force = TIME_STEP * (G * a->mass * b->mass) / ((pow(dist, 2) + pow(SOFTENING, 2)) * dist);
 
     // Acceleration of the target body for 3 dimensions
     a->accel.x -= (force * posdiff.x) / a->mass;
