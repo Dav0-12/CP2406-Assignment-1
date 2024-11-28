@@ -159,7 +159,7 @@ public:
         // Calculate the magnitude of the position difference vector
         const double dist = magnitude(&posdiff);
 
-        // If the distance is zero it means the two bodies are the same. Just return.
+        // If the distance is zero the bodies are the same. Return to avoid division by 0.
         if (dist == 0){
             return;
         }

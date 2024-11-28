@@ -35,6 +35,7 @@
 #define RENDER_INTERVAL 1 // How many timesteps to simulate in between each frame rendered
 //#define PARALLEL_RENDER // Renders faster, but can have inaccuracies (especially when many particles occupy a small space)
 #define DEBUG_INFO false // Print lots of info to the console
+#define BENCHMARK true // Print simulation duration and memory usage results to the console
 
 struct vec3
 {

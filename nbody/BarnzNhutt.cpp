@@ -83,26 +83,31 @@ int main() {
     double *hdImage = new double[WIDTH * HEIGHT * 3];
     struct body *bodies = new struct body[NUM_BODIES];
 
-    initializeBodies(bodies);
+    if (BENCHMARK) {
+        // Get initial memory usage
+        auto initial_memory = getMemoryUsage();
+        // Start measuring time
+        auto start = std::chrono::high_resolution_clock::now();
 
-    // Get initial memory usage
-    auto initial_memory = getMemoryUsage();
-    // Start measuring time
-    auto start = std::chrono::high_resolution_clock::now();
+        initializeBodies(bodies);
+        runSimulation(bodies, image, hdImage);
 
-    runSimulation(bodies, image, hdImage);
+        // Stop measuring time
+        auto end = std::chrono::high_resolution_clock::now();
+        // Get memory usage after the function call
+        auto final_memory = getMemoryUsage();
 
-    // Stop measuring time
-    auto end = std::chrono::high_resolution_clock::now();
-    // Get memory usage after the function call
-    auto final_memory = getMemoryUsage();
+        // Print memory usage
+        std::cout << "\nMemory used by the function: " << (final_memory - initial_memory) / 1024 << " KB" << std::endl;
 
-    // Print memory usage
-    std::cout << "\nMemory used by the function: " << (final_memory - initial_memory) / 1024 << " KB" << std::endl;
+        // Calculate and print the duration
+        std::chrono::duration<double, std::milli> duration = end - start;
+        std::cout << "Simulation Duration: " << duration.count() << " ms" << std::endl;
+    } else {
+        initializeBodies(bodies);
+        runSimulation(bodies, image, hdImage);
+    }
 
-    // Calculate and print the duration
-    std::chrono::duration<double, std::milli> duration = end - start;
-    std::cout << "Simulation Duration: " << duration.count() << " ms" << std::endl;
 
     std::cout << "\nwe made it\n";
     delete[] bodies;
